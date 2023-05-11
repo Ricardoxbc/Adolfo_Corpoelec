@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -565,14 +567,14 @@ public class TurnoUI extends javax.swing.JInternalFrame {
 //            Main.log("Eliminado");
             reset();
         } else {
-            Main.log(Main.GENERIC_ERROR);
+            Main.log(Conn.getLog());
         }
     }//GEN-LAST:event_btnEliminarTurnoActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Nada
         if (turnoActual != null) {
-            exportar(turnoActual);
+            exportar(turnoActual, null);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -639,7 +641,7 @@ public class TurnoUI extends javax.swing.JInternalFrame {
         celdaDatos2.setCellValue(turno.getInicioTurnoX().getMonthValue() + " - " + turno.getInicioTurnoX().getYear());
     }
 
-    public static void exportar(TurnoX turno) {
+    public static void exportar(TurnoX turno, String fileName) {
         try {
 //            XSSFWorkbook libroExcel = new XSSFWorkbook();
             HSSFWorkbook libroExcel = new HSSFWorkbook();
@@ -727,7 +729,10 @@ public class TurnoUI extends javax.swing.JInternalFrame {
             celdaLibre.setCellValue("Libre");
 
             // Crear un archivo de salida para el libro de Excel
-            FileOutputStream archivoSalida = new FileOutputStream("MiArchivoDeExcel.xls");
+            if (fileName == null) {
+                fileName = Main.getUsuario().getNombre() + " " + Main.getUsuario().getApellido() + "_" + System.currentTimeMillis() + ".xls";
+            }
+            FileOutputStream archivoSalida = new FileOutputStream(fileName);
 
             // Guardar el libro de Excel en el archivo de salida
             libroExcel.write(archivoSalida);
@@ -735,8 +740,10 @@ public class TurnoUI extends javax.swing.JInternalFrame {
             // Cerrar el archivo de salida y el libro de Excel
             archivoSalida.close();
             libroExcel.close();
-            Main.log("Archivo guardado");
-            Desktop.getDesktop().open(new File("MiArchivoDeExcel.xls"));
+//            Main.log("Archivo guardado");
+            if (JOptionPane.showConfirmDialog(null, "Documento Guardado, Desea abrirlo?", "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                Desktop.getDesktop().open(new File(fileName));
+            }
         } catch (IOException ex) {
             Logger.getLogger(TurnoUI.class.getName()).log(Level.SEVERE, null, ex);
             Main.log("Error exportando el documento, revisa la consola para más detalles.");

@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import model.TurnoX;
 import model.Usuario;
+import ui.Main;
 
 /**
  *
@@ -220,15 +221,15 @@ public class Conn {
             TurnoX turno = null;
             PreparedStatement stmt = getConnection().prepareStatement("SELECT * FROM turno WHERE id_turno = ?");
             stmt.setLong(1, id);
-            
+
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 turno = getTurnoXFromResultSet(rs);
             }
-            
+
             rs.close();
             stmt.close();
-            
+
             return turno;
         } catch (SQLException ex) {
             Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, ex);
@@ -243,17 +244,21 @@ public class Conn {
             boolean res = stmt.executeUpdate() > 0;
             stmt.close();
             return res;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            log = "Error al eliminar el turno, está asignado a un empleado";
+            Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, e);
         } catch (SQLException ex) {
+            log = Main.GENERIC_ERROR;
             Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
+        return false;
     }
 
     public static String getLog() {
         return log;
     }
 
-    private static TurnoX getTurnoXFromResultSet(ResultSet rs) throws SQLException{
+    private static TurnoX getTurnoXFromResultSet(ResultSet rs) throws SQLException {
         TurnoX turno = new TurnoX()
                 .setId(rs.getLong("id_turno"))
                 .setDescanso(TurnoX.Descanso.valueOf(rs.getString("descanso")))
@@ -269,7 +274,7 @@ public class Conn {
             turnos[i++] = !s.toString().equals("null") ? TurnoX.Turno.valueOf(s.toString()) : null;
         }
         turno.setTurnos(turnos);
-        
+
         return turno;
     }
 

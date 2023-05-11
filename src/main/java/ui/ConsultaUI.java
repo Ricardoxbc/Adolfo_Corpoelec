@@ -239,7 +239,7 @@ public class ConsultaUI extends javax.swing.JInternalFrame {
             Main.log("No hay datos para exportar");
             return;
         }
-        TurnoUI.exportar(turno);
+        TurnoUI.exportar(turno, null);
     }//GEN-LAST:event_btnExportarActionPerformed
 
 

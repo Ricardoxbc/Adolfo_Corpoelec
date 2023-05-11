@@ -32,6 +32,25 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
     private Usuario usuario;
     private List<Usuario> list;
 
+    private final KeyAdapter adapterChr = new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            char c = e.getKeyChar();
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            } else {
+                e.consume();
+            }
+        }
+
+        public void keyTyped(KeyEvent e) {
+            char c = e.getKeyChar();
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            } else {
+                e.consume();
+            }
+        }
+    };
+
     /**
      * Creates new form Usuario
      */
@@ -39,12 +58,25 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
         initComponents();
         listUpdate();
         this.txtNombre.setDocument(new DocumentUpperCase());
+        this.txtNombre.addKeyListener(adapterChr);
+        
         this.txtApellido.setDocument(new DocumentUpperCase());
+        this.txtApellido.addKeyListener(adapterChr);
+        
         this.txtCargo.setDocument(new DocumentUpperCase());
+        this.txtCargo.addKeyListener(adapterChr);
+        
         this.txtCedula.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() < '0' || e.getKeyCode() > '9') {
+                if (e.getKeyChar() < '0' || e.getKeyChar() > '9') {
+                    e.consume();
+                }
+            }
+
+            public void keyTyped(KeyEvent e) {
+                char car = e.getKeyChar();
+                if (car < '0' || car > '9') {
                     e.consume();
                 }
             }

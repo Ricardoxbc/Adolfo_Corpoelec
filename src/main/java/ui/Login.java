@@ -7,6 +7,8 @@ package ui;
 import conexion.Conn;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,9 +18,11 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import model.DocumentUpperCase;
 import model.Usuario;
 
@@ -36,7 +40,23 @@ public class Login extends javax.swing.JInternalFrame {
     public Login(Main main) {
         initComponents();
         this.main = main;
-        this.txtCedula.setDocument(new DocumentUpperCase());
+        this.txtCedula.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() < '0' || e.getKeyChar() > '9') {
+                    e.consume();
+                }
+            }
+
+            public void keyTyped(KeyEvent e) {
+                char car = e.getKeyChar();
+                if (car < '0' || car > '9') {
+                    e.consume();
+                }
+            }
+        });
+        InputMap map = this.txtCedula.getInputMap();
+        map.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK), "null");
     }
 
     /**
@@ -179,6 +199,5 @@ public class Login extends javax.swing.JInternalFrame {
         }
 
     }
-
 
 }

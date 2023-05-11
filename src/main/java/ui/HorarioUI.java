@@ -66,6 +66,8 @@ public class HorarioUI extends javax.swing.JInternalFrame {
         txtFecha = new javax.swing.JTextField();
         btnRemover = new javax.swing.JButton();
 
+        setClosable(true);
+
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel1.setText("Empleados");
 

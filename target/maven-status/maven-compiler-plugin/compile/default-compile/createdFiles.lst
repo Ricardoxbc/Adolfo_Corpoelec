@@ -17,6 +17,7 @@ ui\Main$1.class
 ui\TurnoUI$1.class
 ui\HorarioUI$2.class
 ui\TurnoUI$7.class
+ui\UsuarioUI$7.class
 ui\Main$4.class
 ui\UsuarioUI.class
 ui\UsuarioUI$3.class
@@ -45,6 +46,7 @@ ui\Login.class
 ui\Main$6.class
 ui\TurnoUI$2.class
 ui\TurnoUI$9.class
+ui\Login$4.class
 ui\UsuarioUI$5.class
 model\SetFondo.class
 ui\HorarioUI$7.class

@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -473,61 +474,10 @@ public class Main extends javax.swing.JFrame {
 //                days += diasTranscurridos;
             }
 
-//            for (int day = 1, count = 0; day <= turno.getFinTurnoX().getDayOfMonth(); index++) {
-//                Row f = hoja.createRow(index);
-//                f.setHeightInPoints(FONT_SIZE * 3);
-//                for (int j = diaSemInit; j < DAYS.length && day <= turno.getFinTurnoX().getDayOfMonth() && count < turno.getTurnos().length; j++, day++) {
-//                    Cell c = f.createCell(j);
-//                    String data = day + "";
-//
-//                    if (descanso1 == j || descanso2 == j) {
-////                        data += " L";
-//                        if (add) {
-//                            count++;
-//                        }
-//                        add = false;
-//                        setCellStyle(libroExcel, c, palette, LIBRE, false);
-//                    } else {
-//                        add = true;
-//                        if (turno.getTurnos()[count] != null) {
-//                            String ltt = turno.getTurnos()[count].toString();
-////                            data += " " + ltt;
-//                            short color = ltt.equals("D") ? DIA
-//                                    : ltt.equals("N") ? NOCHE
-//                                    : MIXTO;
-//                            setCellStyle(libroExcel, c, palette, color, false);
-//                        }
-//                    }
-//                    c.setCellValue(data);
-//                }
-//                diaSemInit = 0;
-//            }
-//
-//            // Leyenda 
-//            Row leyenda = hoja.createRow(++index);
-//            leyenda.setHeightInPoints(FONT_SIZE * 2);
-//            int cellPos = 1;
-//            Cell celdaTitle = leyenda.createCell(cellPos++);
-//            setCellStyle(libroExcel, celdaTitle, palette, ROW_P, true);
-//            celdaTitle.setCellValue("Asignaciones:");
-//
-//            Cell celdaDia = leyenda.createCell(cellPos++);
-//            setCellStyle(libroExcel, celdaDia, palette, DIA, true);
-//            celdaDia.setCellValue("Día");
-//
-//            Cell celdaNoche = leyenda.createCell(cellPos++);
-//            setCellStyle(libroExcel, celdaNoche, palette, NOCHE, true);
-//            celdaNoche.setCellValue("Noche");
-//
-//            Cell celdaMixto = leyenda.createCell(cellPos++);
-//            setCellStyle(libroExcel, celdaMixto, palette, MIXTO, true);
-//            celdaMixto.setCellValue("Mixto");
-//
-//            Cell celdaLibre = leyenda.createCell(cellPos++);
-//            setCellStyle(libroExcel, celdaLibre, palette, LIBRE, true);
-//            celdaLibre.setCellValue("Libre");
             // Crear un archivo de salida para el libro de Excel
-            FileOutputStream archivoSalida = new FileOutputStream("MiArchivoDeExcel.xls");
+            LocalDate dateFileName = LocalDate.now();
+            String fileName = "Reporte" + "_" + System.currentTimeMillis() + "_" + dateFileName.format(DateTimeFormatter.ofPattern("MM_yyyy")) + ".xls";
+            FileOutputStream archivoSalida = new FileOutputStream(fileName);
 
             // Guardar el libro de Excel en el archivo de salida
             libroExcel.write(archivoSalida);
@@ -535,8 +485,10 @@ public class Main extends javax.swing.JFrame {
             // Cerrar el archivo de salida y el libro de Excel
             archivoSalida.close();
             libroExcel.close();
-            Main.log("Archivo guardado");
-            Desktop.getDesktop().open(new File("MiArchivoDeExcel.xls"));
+//            Main.log("Archivo guardado");
+            if (JOptionPane.showConfirmDialog(this, "Documento Guardado, Desea abrirlo?", "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                Desktop.getDesktop().open(new File(fileName));
+            }
         } catch (IOException ex) {
             Logger.getLogger(TurnoUI.class.getName()).log(Level.SEVERE, null, ex);
             Main.log("Error exportando el documento, revisa la consola para más detalles.");
