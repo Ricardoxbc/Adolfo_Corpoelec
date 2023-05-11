@@ -42,12 +42,6 @@ public class Login extends javax.swing.JInternalFrame {
         this.main = main;
         this.txtCedula.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyChar() < '0' || e.getKeyChar() > '9') {
-                    e.consume();
-                }
-            }
-
             public void keyTyped(KeyEvent e) {
                 char car = e.getKeyChar();
                 if (car < '0' || car > '9') {

@@ -34,14 +34,6 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
 
     private final KeyAdapter adapterChr = new KeyAdapter() {
         @Override
-        public void keyPressed(KeyEvent e) {
-            char c = e.getKeyChar();
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-            } else {
-                e.consume();
-            }
-        }
-
         public void keyTyped(KeyEvent e) {
             char c = e.getKeyChar();
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -68,12 +60,6 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
         
         this.txtCedula.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyChar() < '0' || e.getKeyChar() > '9') {
-                    e.consume();
-                }
-            }
-
             public void keyTyped(KeyEvent e) {
                 char car = e.getKeyChar();
                 if (car < '0' || car > '9') {
