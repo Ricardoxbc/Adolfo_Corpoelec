@@ -5,10 +5,17 @@
 package ui;
 
 import conexion.Conn;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.InputMap;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import model.DocumentUpperCase;
 import model.Usuario;
 
 /**
@@ -17,6 +24,11 @@ import model.Usuario;
  */
 public class UsuarioUI extends javax.swing.JInternalFrame {
 
+    private final String[] ACCESO = new String[]{
+        "Usuario",
+        "Administrador",
+        "Coordinador"
+    };
     private Usuario usuario;
     private List<Usuario> list;
 
@@ -26,6 +38,19 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
     public UsuarioUI() {
         initComponents();
         listUpdate();
+        this.txtNombre.setDocument(new DocumentUpperCase());
+        this.txtApellido.setDocument(new DocumentUpperCase());
+        this.txtCargo.setDocument(new DocumentUpperCase());
+        this.txtCedula.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() < '0' || e.getKeyCode() > '9') {
+                    e.consume();
+                }
+            }
+        });
+        InputMap map = this.txtCedula.getInputMap();
+        map.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK), "null");
     }
 
     /**
@@ -70,16 +95,19 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
         jLabel1.setText("Nombre");
 
         txtNombre.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtNombre.setToolTipText("campo entre 3 y 20 caracteres");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel2.setText("Apellido");
 
         txtApellido.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtApellido.setToolTipText("campo entre 3 y 20 caracteres");
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setText("Cargo");
 
         txtCargo.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtCargo.setToolTipText("campo entre 2 y 50 caracteres");
 
         boxAcceso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Usuario", "Administrador", "Coordinador" }));
 
@@ -90,11 +118,13 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
         jLabel5.setText("Contraseña");
 
         txtCedula.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtCedula.setToolTipText("campo entre 6 y 9 caracteres");
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel6.setText("Acceso");
 
         txtContrasenia.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtContrasenia.setToolTipText("campo entre 6 y 16 caracteres");
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel7.setText("ID");
@@ -178,10 +208,11 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(boxAcceso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 95, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnGuardar)
-                    .addComponent(btnCancelar)))
+                    .addComponent(btnCancelar))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         tabla.setAutoCreateRowSorter(true);
@@ -281,7 +312,7 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        if (!isCamposValidos()) {
+        if (false && !isCamposValidos()) {
             JOptionPane.showMessageDialog(this, "Campos inválidos");
             return;
         }
@@ -311,11 +342,17 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
             return;
         }
         usuario = list.get(tabla.convertRowIndexToModel(r));
-        boolean res = Conn.eliminarUsuario(usuario);        
+
+        if (Main.getUsuario().equals(usuario)) {
+            Main.log("No puedes eliminar el usuario actual");
+            return;
+        }
+
+        boolean res = Conn.eliminarUsuario(usuario);
         if (res) {
             reset();
             listUpdate();
-            Main.log("Eliminado");
+//            Main.log("Eliminado");
         } else {
             Main.log(Main.GENERIC_ERROR);
         }
@@ -384,19 +421,24 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
     }
 
     private boolean isCamposValidos() {
-        if (txtCedula.getText().trim().isEmpty()) {
+        String cd = txtCedula.getText().trim();
+        if (cd.isEmpty() || cd.length() < 6 || cd.length() > 9) {
             return false;
         }
-        if (txtNombre.getText().trim().isEmpty()) {
+        String nombre = txtNombre.getText().trim();
+        if (nombre.isEmpty() || nombre.length() < 4 || nombre.length() > 20) {
             return false;
         }
-        if (txtApellido.getText().trim().isEmpty()) {
+        String apellido = txtApellido.getText().trim();
+        if (apellido.isEmpty() || apellido.length() < 4 || apellido.length() > 20) {
             return false;
         }
-        if (txtContrasenia.getText().trim().isEmpty()) {
+        String pass = new String(txtContrasenia.getPassword());
+        if (pass.isEmpty() || pass.length() < 6 || pass.length() > 16) {
             return false;
         }
-        if (txtCargo.getText().trim().isEmpty()) {
+        String cargo = txtCargo.getText().trim();
+        if (cargo.isEmpty() || cargo.length() < 2 || cargo.length() > 50) {
             return false;
         }
         return true;
@@ -404,21 +446,25 @@ public class UsuarioUI extends javax.swing.JInternalFrame {
 
     private void listUpdate() {
         list = Conn.getUsuario(null);
-        if (list != null) {
-            DefaultTableModel model = (DefaultTableModel) tabla.getModel();
-            model.setRowCount(0);
+        try {
+            if (list != null) {
+                DefaultTableModel model = (DefaultTableModel) tabla.getModel();
+                model.setRowCount(0);
 
-            for (Usuario u : list) {
-                model.addRow(new String[]{
-                    u.getCedula(),
-                    u.getNombre() + " " + u.getApellido(),
-                    u.getCargo(),
-                    u.getAcceso() + ""
+                for (Usuario u : list) {
+                    model.addRow(new String[]{
+                        u.getCedula(),
+                        u.getNombre() + " " + u.getApellido(),
+                        u.getCargo(),
+                        ACCESO[u.getAcceso()]
+                    }
+                    );
                 }
-                );
-            }
 
-            tabla.setModel(model);
+                tabla.setModel(model);
+            }
+        } catch (Exception e) {
+            Logger.getGlobal().log(Level.SEVERE, null, e);
         }
     }
 }

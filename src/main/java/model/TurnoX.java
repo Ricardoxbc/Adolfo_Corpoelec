@@ -24,6 +24,16 @@ public class TurnoX {
         DL
     }
 
+    public static final String[] DESCANSO_STR = new String[]{
+        "Lun - Mar",
+        "Mar - Mie",
+        "Mie - Jue",
+        "Jue - Vie",
+        "Vie - Sab",
+        "Sab - Dom",
+        "Dom - Lun"
+    };
+
     public static enum Turno {
         D,
         N,
@@ -94,5 +104,10 @@ public class TurnoX {
 //        this.finTurnoX = finTurnoX;
 //        return this;
 //    }
+
+    @Override
+    public String toString() {
+        return "TurnoX{" + "id=" + id + ", turnos=" + turnos + ", descanso=" + descanso + ", inicioTurnoX=" + inicioTurnoX + ", finTurnoX=" + finTurnoX + "}\n";
+    }
 
 }

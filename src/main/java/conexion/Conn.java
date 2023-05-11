@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneOffset;
@@ -26,6 +27,7 @@ import model.Usuario;
 public class Conn {
 
     private static Connection conn;
+    private static String log = "";
 
     static {
         try {
@@ -36,6 +38,7 @@ public class Conn {
     }
 
     protected static Connection getConnection() {
+        log = "";
         if (conn != null) {
             return conn;
         }
@@ -91,15 +94,19 @@ public class Conn {
             stmt.setString(4, u.getContrasenia());
             stmt.setString(5, u.getCargo());
             stmt.setInt(6, u.getAcceso());
-            stmt.setLong(7, u.getHorarioId());
+            stmt.setObject(7, u.getHorarioId());
             stmt.setLong(8, u.getId());
             boolean res = stmt.executeUpdate() > 0;
             stmt.close();
             return res;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            log = "Error al actualizar el usuario, el turno ya está asignado";
+            Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, e);
         } catch (SQLException ex) {
+            log = "Error al actualizar el usuario, detalles en la consola";
             Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
+        return false;
     }
 
     public static List<Usuario> getUsuario(Usuario u) {
@@ -121,6 +128,8 @@ public class Conn {
                     sql += " AND contrasenia = ? ";
                     fields[parms++] = u.getContrasenia();
                 }
+            } else {
+                sql += " AND id_usuario > 1 ";
             }
             PreparedStatement stmt = getConnection().prepareStatement(sql);
             for (int i = 0; i < parms; i++) {
@@ -137,6 +146,9 @@ public class Conn {
                         .setCargo(rs.getString("cargo"))
                         .setAcceso(rs.getInt("acceso"))
                         .setHorarioId(rs.getObject("id_turno", Long.class));
+                if (user.getHorarioId() != null) {
+                    user.setHorario(getTurno(user.getHorarioId()));
+                }
                 list.add(user);
             }
             stmt.close();
@@ -185,29 +197,14 @@ public class Conn {
     public static List<TurnoX> getTurnos(LocalDate fecha) {
         try {
             List<TurnoX> list = new ArrayList<>();
-            String sql = "SELECT * FROM turno WHERE ? >= fechaInicio AND ? <= fechaFin";
+            String sql = "SELECT * FROM turno WHERE ? >= fechaInicio AND ? <= fechaFin ORDER BY id_turno DESC";
             PreparedStatement stmt = getConnection().prepareStatement(sql);
             stmt.setDate(1, java.sql.Date.valueOf(fecha));
             stmt.setDate(2, java.sql.Date.valueOf(fecha));
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                TurnoX turno = new TurnoX()
-                        .setId(rs.getLong("id_turno"))
-                        .setDescanso(TurnoX.Descanso.valueOf(rs.getString("descanso")))
-                        .setInicioTurnoX(LocalDate.parse(rs.getString("fechaInicio")));
-                String[] turnosSplit = rs.getString("turno").replace("[", "").replace("]", "").split(",");
-                Object[] arr = Arrays.stream(turnosSplit)
-                        .map(s -> s.trim())
-                        .collect(Collectors.toCollection(ArrayList::new))
-                        .toArray();
-                TurnoX.Turno[] turnos = new TurnoX.Turno[5];
-                int i = 0;
-                for (Object s : arr) {
-                    turnos[i++] = !s.toString().equals("null") ? TurnoX.Turno.valueOf(s.toString()) : null;
-                }
-                turno.setTurnos(turnos);
-                list.add(turno);
+                list.add(getTurnoXFromResultSet(rs));
             }
             stmt.close();
             rs.close();
@@ -217,7 +214,28 @@ public class Conn {
             return null;
         }
     }
-    
+
+    public static TurnoX getTurno(long id) {
+        try {
+            TurnoX turno = null;
+            PreparedStatement stmt = getConnection().prepareStatement("SELECT * FROM turno WHERE id_turno = ?");
+            stmt.setLong(1, id);
+            
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                turno = getTurnoXFromResultSet(rs);
+            }
+            
+            rs.close();
+            stmt.close();
+            
+            return turno;
+        } catch (SQLException ex) {
+            Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
     public static boolean eliminarTurno(TurnoX t) {
         try {
             PreparedStatement stmt = getConnection().prepareStatement("DELETE FROM turno WHERE id_turno = ?");
@@ -229,6 +247,30 @@ public class Conn {
             Logger.getLogger(Conn.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
+    }
+
+    public static String getLog() {
+        return log;
+    }
+
+    private static TurnoX getTurnoXFromResultSet(ResultSet rs) throws SQLException{
+        TurnoX turno = new TurnoX()
+                .setId(rs.getLong("id_turno"))
+                .setDescanso(TurnoX.Descanso.valueOf(rs.getString("descanso")))
+                .setInicioTurnoX(LocalDate.parse(rs.getString("fechaInicio")));
+        String[] turnosSplit = rs.getString("turno").replace("[", "").replace("]", "").split(",");
+        Object[] arr = Arrays.stream(turnosSplit)
+                .map(s -> s.trim())
+                .collect(Collectors.toCollection(ArrayList::new))
+                .toArray();
+        TurnoX.Turno[] turnos = new TurnoX.Turno[5];
+        int i = 0;
+        for (Object s : arr) {
+            turnos[i++] = !s.toString().equals("null") ? TurnoX.Turno.valueOf(s.toString()) : null;
+        }
+        turno.setTurnos(turnos);
+        
+        return turno;
     }
 
 }

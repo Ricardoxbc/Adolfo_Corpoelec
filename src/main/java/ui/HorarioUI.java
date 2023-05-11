@@ -21,7 +21,7 @@ import model.Usuario;
  *
  * @author Ricardo Bermudez
  */
-public class HorarioUI extends javax.swing.JFrame {
+public class HorarioUI extends javax.swing.JInternalFrame {
 
     List<Usuario> listaUsuarios;
     List<TurnoX> listaTurnos;
@@ -64,6 +64,7 @@ public class HorarioUI extends javax.swing.JFrame {
         btnActualizar = new javax.swing.JButton();
         btnAsignar = new javax.swing.JButton();
         txtFecha = new javax.swing.JTextField();
+        btnRemover = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel1.setText("Empleados");
@@ -96,6 +97,9 @@ public class HorarioUI extends javax.swing.JFrame {
         tablaTurnos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tablaTurnos.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(tablaTurnos);
+        if (tablaTurnos.getColumnModel().getColumnCount() > 0) {
+            tablaTurnos.getColumnModel().getColumn(0).setMaxWidth(50);
+        }
 
         tablaEmpleados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -154,6 +158,13 @@ public class HorarioUI extends javax.swing.JFrame {
             }
         });
 
+        btnRemover.setText("Remover");
+        btnRemover.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoverActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -164,11 +175,15 @@ public class HorarioUI extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
-                                .addGap(18, 18, 18))
-                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
-                                .addGap(196, 196, 196)))
+                                .addGap(196, 196, 196))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addComponent(btnRemover))
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE))
+                                .addGap(18, 18, 18)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2)
@@ -197,7 +212,8 @@ public class HorarioUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnActualizar)
                     .addComponent(btnAsignar)
-                    .addComponent(txtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnRemover))
                 .addGap(92, 92, 92))
         );
 
@@ -227,10 +243,10 @@ public class HorarioUI extends javax.swing.JFrame {
         boolean res = Conn.updateUsuario(uSel);
 
         if (res) {
-            Main.log("Asignado");
+//            Main.log("Asignado");
             actualizar();
         } else {
-            Main.log(Main.GENERIC_ERROR);
+            Main.log(Conn.getLog());
         }
     }//GEN-LAST:event_btnAsignarActionPerformed
 
@@ -242,10 +258,33 @@ public class HorarioUI extends javax.swing.JFrame {
         actualizar();
     }//GEN-LAST:event_btnActualizarActionPerformed
 
+    private void btnRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverActionPerformed
+        int rowEmp = tablaEmpleados.getSelectedRow();
+        if (rowEmp < 0 ) {
+            return;
+        }
+        if (!(JOptionPane.showConfirmDialog(this, "Confirmar", "", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)) {
+            return;
+        }
+
+        Usuario uSel = listaUsuarios.get(rowEmp);
+        uSel.setHorarioId(null);
+
+        boolean res = Conn.updateUsuario(uSel);
+
+        if (res) {
+//            Main.log("Horario removido");
+            actualizar();
+        } else {
+            Main.log(Main.GENERIC_ERROR);
+        }
+    }//GEN-LAST:event_btnRemoverActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActualizar;
     private javax.swing.JButton btnAsignar;
+    private javax.swing.JButton btnRemover;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -285,8 +324,8 @@ public class HorarioUI extends javax.swing.JFrame {
             for (TurnoX t : listaTurnos) {
                 String row[] = new String[]{
                     t.getId() + "",
-                    t.getDescanso().toString(),
-                    Arrays.toString(t.getTurnos()),
+                    TurnoX.DESCANSO_STR[t.getDescanso().ordinal()],
+                    Arrays.toString(t.getTurnos()).replace("[", "").replace("]", ""),
                     t.getInicioTurnoX().format(DateTimeFormatter.ofPattern(TurnoUI.DATE_FORMAT)),
                     t.getFinTurnoX().format(DateTimeFormatter.ofPattern(TurnoUI.DATE_FORMAT))
                 };
@@ -296,12 +335,4 @@ public class HorarioUI extends javax.swing.JFrame {
             tablaTurnos.setModel(model);
         }
     }
-
-    public static void main(String[] args) {
-        HorarioUI horarioUI = new HorarioUI();
-        horarioUI.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        horarioUI.setVisible(true);
-        horarioUI.setLocationRelativeTo(null);
-    }
-
 }

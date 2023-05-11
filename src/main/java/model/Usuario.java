@@ -1,6 +1,8 @@
 
 package model;
 
+import java.util.Objects;
+
 /**
  *
  * @author Ricardo Bermudez
@@ -130,5 +132,38 @@ public class Usuario {
         descanso[2] = dia2;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Usuario{" + "id=" + id + ", cedula=" + cedula + ", acceso=" + acceso + ", nombre=" + nombre + ", apellido=" + apellido + ", cargo=" + cargo + ", turno=" + turno + ", descanso=" + descanso + ", horarioId=" + horarioId + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        hash = 53 * hash + Objects.hashCode(this.cedula);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Usuario other = (Usuario) obj;
+        if (!Objects.equals(this.cedula, other.cedula)) {
+            return false;
+        }
+        return Objects.equals(this.id, other.id);
+    }
+    
+    
     
 }

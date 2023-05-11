@@ -26,7 +26,7 @@ public class CellRenderedColours extends DefaultTableCellRenderer {
     public static final Color CELL_DIA = new Color(255, 181, 70);
     public static final Color CELL_NOCHE = new Color(19, 180, 255);
     public static final Color CELL_MIXTO = new Color(240, 60, 240);
-
+    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         TurnoX.Turno turno = null;
